@@ -3,6 +3,9 @@ from selenium.webdriver.firefox.options import Options
 
 options = Options()
 options.headless = True
+
+gotError=False
+
 import requests,os,re,sys,shutil
 import threading,time
 
@@ -40,8 +43,10 @@ def renameFile(fl,newName):
     print(fl,newName)
 
 def getName(fl):
-    searchUrl = 'http://www.google.hr/searchbyimage/upload'
+    global gotError
 
+    searchUrl = 'http://www.google.hr/searchbyimage/upload'
+    #
     browser = webdriver.Firefox(options=options)
    
     filePath = fl
@@ -53,6 +58,10 @@ def getName(fl):
 
     imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
+    if imgname == None or len(imgname) < 3:
+        gotError = True
+        pass
+
     renameFile(fl,imgname.replace(" ",''))
 
     browser.close()
@@ -62,6 +71,8 @@ def getName(fl):
 
 def main():
 
+    global gotError
+
     os.chdir(sys.argv[1])
 
     files = scanFiles()
@@ -70,11 +81,14 @@ def main():
     ctr=0
 
     for img in files:
+        if gotError:
+            sys.exit()
         print(str(ctr)+"/"+str(files_count),end=" ")
         ctr+=1
         threading.Thread(target=getName,args=(img,)).start()
+        time.sleep(1)
         while  threading.active_count() > 5:
-            time.sleep(0.75)
+            time.sleep(1.5)
 
        
 
