@@ -1,8 +1,8 @@
 from selenium import webdriver
 import requests
 
-def main():
 
+def getName(fl):
     searchUrl = 'http://www.google.hr/searchbyimage/upload'
 
     browser = webdriver.Firefox()
@@ -17,6 +17,12 @@ def main():
     imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
     print(imgname)
+
+
+
+def main():
+
+    
 
 
 if __name__ == "__main__":
