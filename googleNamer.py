@@ -45,26 +45,28 @@ def renameFile(fl,newName):
 def getName(fl):
     global gotError
 
-    searchUrl = 'http://www.google.hr/searchbyimage/upload'
-    #
-    browser = webdriver.Firefox(options=options)
-   
-    filePath = fl
-    multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
-    response = requests.post(searchUrl, files=multipart, allow_redirects=False)
-    fetchUrl = response.headers['Location']
+    try:
+        searchUrl = 'http://www.google.hr/searchbyimage/upload'
+        #
+        browser = webdriver.Firefox(options=options)
+    
+        filePath = fl
+        multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
+        response = requests.post(searchUrl, files=multipart, allow_redirects=False)
+        fetchUrl = response.headers['Location']
 
-    browser.get(fetchUrl)
+        browser.get(fetchUrl)
 
-    imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
+        imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
-    if imgname == None or len(imgname) < 3:
+        if imgname == None or len(imgname) < 3:
+            gotError = True
+            pass
+
+        renameFile(fl,imgname.replace(" ",''))
+    except Exception as e:
         gotError = True
-        pass
-
-    renameFile(fl,imgname.replace(" ",''))
-
-    browser.close()
+        browser.close()
 
 
 
