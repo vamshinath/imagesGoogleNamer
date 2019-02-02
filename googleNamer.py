@@ -1,4 +1,8 @@
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+
+options = Options()
+options.headless = True
 import requests,os,re,sys,shutil
 import threading,time
 
@@ -33,11 +37,12 @@ def renameFile(fl,newName):
     path = os.path.dirname(fl)
     ext="."+os.path.basename(fl).split(".")[-1]
     shutil.move(fl,path+"/gsd"+newName+ext)
+    print(fl,newName)
 
 def getName(fl):
     searchUrl = 'http://www.google.hr/searchbyimage/upload'
 
-    browser = webdriver.Firefox()
+    browser = webdriver.Firefox(options=options)
    
     filePath = fl
     multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
@@ -61,7 +66,12 @@ def main():
 
     files = scanFiles()
 
+    files_count = len(files)
+    ctr=0
+
     for img in files:
+        print(str(ctr)+"/"+str(files_count),end=" ")
+        ctr+=1
         threading.Thread(target=getName,args=(img,)).start()
         while  threading.active_count() > 5:
             time.sleep(0.5)
