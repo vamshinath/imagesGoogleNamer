@@ -1,9 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
-options = Options()
-options.headless = True
+from fake_useragent import UserAgent
+ua = UserAgent()
 
+options = Options()
+#options.headless = False
+browser = ''
 gotError=False
 
 import requests,os,re,sys,shutil
@@ -43,17 +46,29 @@ def renameFile(fl,newName):
     print(fl,newName)
 
 def getName(fl):
+    print("in getName")
     global gotError
+    global ua
+    global browser
+    global options
 
     try:
         searchUrl = 'http://www.google.hr/searchbyimage/upload'
         #
-        browser = webdriver.Firefox(options=options)
+        userAgent = ua.random
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("general.useragent.override", userAgent)
+
+        options.add_argument(f'user-agent={userAgent}')
+        browser = webdriver.Firefox(firefox_profile=profile,options=options)
     
         filePath = fl
         multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
-        response = requests.post(searchUrl, files=multipart, allow_redirects=False)
+        header = {'User-Agent':str(userAgent)}
+        response = requests.post(searchUrl, files=multipart, allow_redirects=False,headers=header)
         fetchUrl = response.headers['Location']
+
+        print("request sent")
 
         browser.get(fetchUrl)
 
@@ -65,8 +80,10 @@ def getName(fl):
 
         renameFile(fl,imgname.replace(" ",''))
     except Exception as e:
+        print(e)
         gotError = True
-        browser.close()
+        if not browser:
+            browser.close()
 
 
 
@@ -83,13 +100,20 @@ def main():
     ctr=0
 
     for img in files:
-        if gotError:
-            sys.exit()
+        # if gotError:
+        #     time.sleep(1.5)
+        if gotError and ctr > 30:
+            os.system("python3 ~/googleNamer.py "+sys.argv[1])
+            break
+
+
         print(str(ctr)+"/"+str(files_count),end=" ")
         ctr+=1
+        #getName(img)
+        #time.sleep(2)
         threading.Thread(target=getName,args=(img,)).start()
-        time.sleep(2)
-        while  threading.active_count() > 5:
+        time.sleep(1.3)
+        while  threading.active_count() > 4:
             time.sleep(1.5)
 
        
