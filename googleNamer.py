@@ -88,7 +88,7 @@ def main():
         print(str(ctr)+"/"+str(files_count),end=" ")
         ctr+=1
         threading.Thread(target=getName,args=(img,)).start()
-        time.sleep(1)
+        time.sleep(2)
         while  threading.active_count() > 5:
             time.sleep(1.5)
 
