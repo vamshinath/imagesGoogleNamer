@@ -1,5 +1,6 @@
 from selenium import webdriver
-import requests,os,re,sys
+import requests,os,re,sys,shutil
+import threading,time
 
 def scanFiles():
 
@@ -8,7 +9,7 @@ def scanFiles():
 
     for root, directories, filenames in os.walk('.'):
         for filename in filenames:
-            if "9351" in filename:
+            if "9351" in filename or filename.startswith("gsd"):
                 continue
             try:
                     f=os.path.abspath(os.path.join(root,filename))
@@ -27,14 +28,18 @@ def scanFiles():
             imgFiles.append(fl)
 
     return imgFiles
-        
+ 
+def renameFile(fl,newName):
+    path = os.path.dirname(fl)
+    ext="."+os.path.basename(fl).split(".")[-1]
+    shutil.move(fl,path+"/gsd"+newName+ext)
 
 def getName(fl):
     searchUrl = 'http://www.google.hr/searchbyimage/upload'
 
     browser = webdriver.Firefox()
    
-    filePath =  ""
+    filePath = fl
     multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
     response = requests.post(searchUrl, files=multipart, allow_redirects=False)
     fetchUrl = response.headers['Location']
@@ -43,7 +48,10 @@ def getName(fl):
 
     imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
-    print(imgname)
+    renameFile(fl,imgname.replace(" ",''))
+
+    browser.close()
+
 
 
 
@@ -54,8 +62,12 @@ def main():
     files = scanFiles()
 
     for img in files:
-        print(img)
-    
+        threading.Thread(target=getName,args=(img,)).start()
+        while  threading.active_count() > 5:
+            time.sleep(0.5)
+
+       
+
 
 
 if __name__ == "__main__":
