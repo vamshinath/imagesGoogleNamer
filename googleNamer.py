@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-
+from fake_useragent import UserAgent
+import base64
+ua = UserAgent()
 options = Options()
 options.headless = True
 
@@ -46,16 +48,34 @@ def getName(fl):
     global gotError
 
     try:
-        searchUrl = 'http://www.google.hr/searchbyimage/upload'
-        #
+        searchUrl = 'https://www.google.com/imghp?sbi=1&gws_rd=ssl'
+        rsearchUrl= "http://www.google.com/searchbyimage/upload"
         browser = webdriver.Firefox(options=options)
+    
+        userAgent = ua.random
+        #browser = webdriver.Firefox()
     
         filePath = fl
         multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
-        response = requests.post(searchUrl, files=multipart, allow_redirects=False)
+        header = {'User-Agent':str(userAgent)}
+        response = requests.post(rsearchUrl, files=multipart, allow_redirects=False,headers=header)
         fetchUrl = response.headers['Location']
 
+        time.sleep(2)
+        browser.get(searchUrl)
+        time.sleep(1.5)
+        browser.find_element_by_link_text("Upload an image").click()
+        time.sleep(2)
+        image = "data:image/jpg;base64," + filePath
+        
+        browser.execute_script('document.getElementById("qbui").value = "' + image + '"')
+
+        browser.find_element_by_id("qbf").submit()
+        time.sleep(2)
+
         browser.get(fetchUrl)
+
+        time.sleep(2)
 
         imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
@@ -64,9 +84,12 @@ def getName(fl):
             pass
 
         renameFile(fl,imgname.replace(" ",''))
-    except Exception as e:
-        gotError = True
         browser.close()
+    except Exception as e:
+        print(e)
+        gotError = True
+        if not browser == None:
+            browser.close()
 
 
 
@@ -84,7 +107,7 @@ def main():
 
     for img in files:
         if gotError:
-            sys.exit()
+            time.sleep(2.5)
         print(str(ctr)+"/"+str(files_count),end=" ")
         ctr+=1
         threading.Thread(target=getName,args=(img,)).start()
