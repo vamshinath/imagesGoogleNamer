@@ -1,12 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from fake_useragent import UserAgent
-import base64
 
 from multiprocessing.dummy import Pool
 
-
-ua = UserAgent()
 options = Options()
 options.headless = True
 files_count=0
@@ -62,36 +58,28 @@ def getName(fl):
     print(str(counter)+"/"+str(files_count))
 
     try:
-        searchUrl = 'https://www.google.com/imghp?sbi=1&gws_rd=ssl'
-        rsearchUrl= "http://www.google.com/searchbyimage/upload"
+        searchUrl = 'https://smallseotools.com/reverse-image-search/'
         browser = webdriver.Firefox(options=options)
     
-        userAgent = ua.random
-        #browser = webdriver.Firefox()
-    
         filePath = fl
-        multipart = {'encoded_image': (filePath, open(filePath, 'rb')), 'image_content': ''}
-        header = {'User-Agent':str(userAgent)}
-        response = requests.post(rsearchUrl, files=multipart, allow_redirects=False,headers=header)
-        fetchUrl = response.headers['Location']
-
-        time.sleep(1)
         browser.get(searchUrl)
-        time.sleep(1)
-        browser.find_element_by_link_text("Upload an image").click()
+        time.sleep(2.5)
+
+        browser.find_element_by_id("imgFile").send_keys(filePath)
+        browser.find_element_by_id("checkReverse").submit()
+
         time.sleep(1.5)
-        # image = "data:image/jpg;base64," + filePath
-        
-        # browser.execute_script('document.getElementById("qbui").value = "' + image + '"')
+        link = getGoogleLink(browser)
+        browser.get(link)
+        time.sleep(2)
 
-        # browser.find_element_by_id("qbf").submit()
-        # time.sleep(2)
+        ul=browser.find_element_by_class_name("other-sites__container")
 
-        browser.get(fetchUrl)
+        imgname=ul.find_element_by_class_name("other-sites__desc").text
 
-        time.sleep(1)
+        print(imgname)
 
-        imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
+        # imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
         if imgname == None or len(imgname) < 3:
             gotError = True
@@ -106,6 +94,19 @@ def getName(fl):
             browser.close()
 
 
+def getGoogleLink(browser):
+    link=''
+    while len(link) <3:
+        try:
+            link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
+            print(link)
+        except IndexError:
+            time.sleep(2)
+            link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
+        except Exception as e:
+            print(e)
+            time.sleep(1)
+    return link
 
 
 def main():
@@ -118,7 +119,6 @@ def main():
     files = scanFiles()
 
     files_count = len(files)
-    ctr=0
 
     mypool = Pool(10)
 
@@ -126,6 +126,9 @@ def main():
 
     mypool.join()
     mypool.close()
+
+
+
 
     # for img in files:
 
