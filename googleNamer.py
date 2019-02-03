@@ -2,6 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from fake_useragent import UserAgent
 import base64
+
+from multiprocessing.dummy import Pool
+
+
 ua = UserAgent()
 options = Options()
 options.headless = True
@@ -88,7 +92,7 @@ def getName(fl):
     except Exception as e:
         print(e)
         gotError = True
-        if not browser == None:
+        if not browser is None:
             browser.close()
 
 
@@ -105,15 +109,25 @@ def main():
     files_count = len(files)
     ctr=0
 
-    for img in files:
-        if gotError:
-            time.sleep(2.5)
-        print(str(ctr)+"/"+str(files_count),end=" ")
-        ctr+=1
-        threading.Thread(target=getName,args=(img,)).start()
-        time.sleep(2)
-        while  threading.active_count() > 5:
-            time.sleep(1.5)
+    mypool = Pool(10)
+
+    mypool.map(getName,files)
+
+    mypool.join()
+    mypool.close()
+
+    # for img in files:
+
+        
+
+        # if gotError:
+        #     time.sleep(2.5)
+        # print(str(ctr)+"/"+str(files_count),end=" ")
+        # ctr+=1
+        # threading.Thread(target=getName,args=(img,)).start()
+        # time.sleep(5)
+        # while  threading.active_count() > 15:
+        #     time.sleep(1.5)
 
        
 
