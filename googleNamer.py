@@ -45,8 +45,8 @@ def scanFiles():
     return imgFiles
  
 def renameFile(fl,newName):
-    if len(newName) == 0:
-        pass
+    if len(newName) <2:
+        return
 
     path = os.path.dirname(fl)
     ext="."+os.path.basename(fl).split(".")[-1]
