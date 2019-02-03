@@ -45,6 +45,9 @@ def scanFiles():
     return imgFiles
  
 def renameFile(fl,newName):
+    if len(newName) == 0:
+        pass
+
     path = os.path.dirname(fl)
     ext="."+os.path.basename(fl).split(".")[-1]
     shutil.move(fl,path+"/gsd"+newName+ext)
