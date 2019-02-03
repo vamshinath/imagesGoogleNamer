@@ -59,7 +59,7 @@ def getName(fl):
 
     try:
         searchUrl = 'https://smallseotools.com/reverse-image-search/'
-        browser = webdriver.Firefox(options=options)
+        browser = webdriver.Firefox()
     
         filePath = fl
         browser.get(searchUrl)
@@ -70,8 +70,10 @@ def getName(fl):
 
         time.sleep(1.5)
         link = getGoogleLink(browser)
+        if link == False:
+            return 
         browser.get(link)
-        time.sleep(2)
+        time.sleep(2.5)
 
         ul=browser.find_element_by_class_name("other-sites__container")
 
@@ -82,13 +84,14 @@ def getName(fl):
         # imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
         if imgname == None or len(imgname) < 3:
+            print("Nothing")
             gotError = True
             pass
 
         renameFile(fl,imgname.replace(" ",''))
         browser.close()
     except Exception as e:
-        print(e)
+        print("hey "+str(e))
         gotError = True
         if not browser is None:
             browser.close()
@@ -102,7 +105,7 @@ def getGoogleLink(browser):
             print(link)
         except IndexError:
             time.sleep(2)
-            link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
+            return False
         except Exception as e:
             print(e)
             time.sleep(1)
@@ -126,7 +129,6 @@ def main():
 
     mypool.join()
     mypool.close()
-
 
 
 
