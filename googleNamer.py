@@ -9,6 +9,8 @@ from multiprocessing.dummy import Pool
 ua = UserAgent()
 options = Options()
 options.headless = True
+files_count=0
+counter=0
 
 gotError=False
 
@@ -49,7 +51,12 @@ def renameFile(fl,newName):
     print(fl,newName)
 
 def getName(fl):
+    global counter
     global gotError
+    counter+=1
+
+
+    print(str(counter)+"/"+str(files_count))
 
     try:
         searchUrl = 'https://www.google.com/imghp?sbi=1&gws_rd=ssl'
@@ -65,21 +72,21 @@ def getName(fl):
         response = requests.post(rsearchUrl, files=multipart, allow_redirects=False,headers=header)
         fetchUrl = response.headers['Location']
 
-        time.sleep(2)
+        time.sleep(1)
         browser.get(searchUrl)
-        time.sleep(1.5)
+        time.sleep(1)
         browser.find_element_by_link_text("Upload an image").click()
-        time.sleep(2)
-        image = "data:image/jpg;base64," + filePath
+        time.sleep(1.5)
+        # image = "data:image/jpg;base64," + filePath
         
-        browser.execute_script('document.getElementById("qbui").value = "' + image + '"')
+        # browser.execute_script('document.getElementById("qbui").value = "' + image + '"')
 
-        browser.find_element_by_id("qbf").submit()
-        time.sleep(2)
+        # browser.find_element_by_id("qbf").submit()
+        # time.sleep(2)
 
         browser.get(fetchUrl)
 
-        time.sleep(2)
+        time.sleep(1)
 
         imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
 
@@ -101,6 +108,7 @@ def getName(fl):
 def main():
 
     global gotError
+    global files_count
 
     os.chdir(sys.argv[1])
 
