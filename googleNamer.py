@@ -59,7 +59,7 @@ def getName(fl):
 
     try:
         searchUrl = 'https://smallseotools.com/reverse-image-search/'
-        browser = webdriver.Firefox()
+        browser = webdriver.Firefox(options=options)
     
         filePath = fl
         browser.get(searchUrl)
@@ -93,8 +93,7 @@ def getName(fl):
     except Exception as e:
         print("hey "+str(e))
         gotError = True
-        if not browser is None:
-            browser.close()
+        browser.close()
 
 
 def getGoogleLink(browser):
@@ -123,27 +122,25 @@ def main():
 
     files_count = len(files)
 
-    mypool = Pool(10)
+    # mypool = Pool(10)
 
-    mypool.map(getName,files)
+    # mypool.map(getName,files)
 
-    mypool.join()
-    mypool.close()
+    # mypool.join()
+    # mypool.close()
 
 
 
-    # for img in files:
+    for img in files:
 
         
 
-        # if gotError:
-        #     time.sleep(2.5)
-        # print(str(ctr)+"/"+str(files_count),end=" ")
-        # ctr+=1
-        # threading.Thread(target=getName,args=(img,)).start()
-        # time.sleep(5)
-        # while  threading.active_count() > 15:
-        #     time.sleep(1.5)
+        if gotError:
+            time.sleep(2.5)
+        threading.Thread(target=getName,args=(img,)).start()
+        time.sleep(3)
+        while  threading.active_count() > 8:
+            time.sleep(1.5)
 
        
 
