@@ -75,7 +75,7 @@ def getName(fl):
         browser.get(link)
         time.sleep(2.5)
 
-        ul=getOtherContainerLink(browser)
+        ul=getOtherContainerObject(browser)
         if ul == False:
             return
 
@@ -104,7 +104,6 @@ def getYandexLink(browser):
         try:
             link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
         except Exception as e:
-            print(e)
             time.sleep(2.5)
 
     if len(link) < 3:
@@ -112,10 +111,10 @@ def getYandexLink(browser):
 
     return link
 
-def getOtherContainerLink(browser):
+def getOtherContainerObject(browser):
     link=''
     counter = 0
-    while len(link) <3 and counter < 4:
+    while ( link == '' or link == None) and counter < 4:
         counter+=1
         try:
             link=browser.find_element_by_class_name("other-sites__container")
@@ -123,7 +122,7 @@ def getOtherContainerLink(browser):
             print(e)
             time.sleep(2.5)
 
-    if len(link) < 3:
+    if link == "" or link == None:
         return False
 
     return link
@@ -140,25 +139,25 @@ def main():
 
     files_count = len(files)
 
-    # mypool = Pool(10)
+    mypool = Pool(8)
 
-    # mypool.map(getName,files)
+    mypool.map(getName,files)
 
-    # mypool.join()
-    # mypool.close()
+    mypool.join()
+    mypool.close()
 
 
 
-    for img in files:
+    # for img in files:
 
         
 
-        if gotError:
-            time.sleep(2.5)
-        threading.Thread(target=getName,args=(img,)).start()
-        time.sleep(3)
-        while  threading.active_count() > 8:
-            time.sleep(1.5)
+    #     if gotError:
+    #         time.sleep(2.5)
+    #     threading.Thread(target=getName,args=(img,)).start()
+    #     time.sleep(3)
+    #     while  threading.active_count() > 2:
+    #         time.sleep(1.5)
 
        
 
