@@ -69,24 +69,24 @@ def getName(fl):
         browser.find_element_by_id("checkReverse").submit()
 
         time.sleep(1.5)
-        link = getGoogleLink(browser)
+        link = getYandexLink(browser)
         if link == False:
             return 
         browser.get(link)
         time.sleep(2.5)
 
-        ul=browser.find_element_by_class_name("other-sites__container")
+        ul=getOtherContainerLink(browser)
+        if ul == False:
+            return
 
         imgname=ul.find_element_by_class_name("other-sites__desc").text
 
         print(imgname)
 
-        # imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
-
         if imgname == None or len(imgname) < 3:
             print("Nothing")
             gotError = True
-            pass
+            return
 
         renameFile(fl,imgname.replace(" ",''))
         browser.close()
@@ -96,18 +96,36 @@ def getName(fl):
         browser.close()
 
 
-def getGoogleLink(browser):
+def getYandexLink(browser):
     link=''
-    while len(link) <3:
+    counter = 0
+    while len(link) <3 and counter < 4:
+        counter+=1
         try:
             link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
-            print(link)
-        except IndexError:
-            time.sleep(2)
-            return False
         except Exception as e:
             print(e)
-            time.sleep(1)
+            time.sleep(2.5)
+
+    if len(link) < 3:
+        return False
+
+    return link
+
+def getOtherContainerLink(browser):
+    link=''
+    counter = 0
+    while len(link) <3 and counter < 4:
+        counter+=1
+        try:
+            link=browser.find_element_by_class_name("other-sites__container")
+        except Exception as e:
+            print(e)
+            time.sleep(2.5)
+
+    if len(link) < 3:
+        return False
+
     return link
 
 
