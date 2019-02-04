@@ -119,7 +119,6 @@ def getOtherContainerObject(browser):
         try:
             link=browser.find_element_by_class_name("other-sites__container")
         except Exception as e:
-            print(e)
             time.sleep(2.5)
 
     if link == "" or link == None:
@@ -139,25 +138,22 @@ def main():
 
     files_count = len(files)
 
-    mypool = Pool(8)
+    # mypool = Pool(8)
 
-    mypool.map(getName,files)
+    # mypool.map(getName,files)
 
-    mypool.join()
-    mypool.close()
+    # mypool.join()
+    # mypool.close()
 
 
 
-    # for img in files:
-
-        
-
-    #     if gotError:
-    #         time.sleep(2.5)
-    #     threading.Thread(target=getName,args=(img,)).start()
-    #     time.sleep(3)
-    #     while  threading.active_count() > 2:
-    #         time.sleep(1.5)
+    for img in files:
+        if gotError:
+            time.sleep(2.5)
+        threading.Thread(target=getName,args=(img,)).start()
+        time.sleep(3)
+        while  threading.active_count() > 8:
+            time.sleep(3)
 
        
 
