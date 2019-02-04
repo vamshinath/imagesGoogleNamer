@@ -1,13 +1,13 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 
 from multiprocessing.dummy import Pool
 
 options = Options()
-options.headless = True
+options.headless = True 
 files_count=0
 counter=0
-
+CHROMEDRIVER_PATH="/home/vamshi/chromedriver"
 gotError=False
 
 import requests,os,re,sys,shutil
@@ -59,7 +59,7 @@ def getName(fl):
 
     try:
         searchUrl = 'https://smallseotools.com/reverse-image-search/'
-        browser = webdriver.Firefox(options=options)
+        browser = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
     
         filePath = fl
         browser.get(searchUrl)
@@ -145,15 +145,25 @@ def main():
     # mypool.join()
     # mypool.close()
 
+    threads=[]
 
 
     for img in files:
         if gotError:
             time.sleep(2.5)
-        threading.Thread(target=getName,args=(img,)).start()
+        t=threading.Thread(target=getName,args=(img,))
+        threads.append(t)
+        t.start()
         time.sleep(3)
-        while  threading.active_count() > 8:
-            time.sleep(3)
+        while threading.active_count() > 8:
+            ctr=0
+            for t in threads:
+                if ctr> 4:
+                    break
+                t.join()
+                t._delete()
+                threads.remove(t)
+                ctr+=1
 
        
 
