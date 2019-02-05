@@ -123,7 +123,8 @@ def googleAndYanex(browser):
 
 
     if imgname == None or len(imgname) < 3 :
-        imgname = getYandexName(browser,slinks[-1].get_attribute("href"))
+        imgname = "yn"+getYandexName(browser,slinks[-1].get_attribute("href"))
+        print("Yandex")
 
     if imgname == None or len(imgname) < 3:
         return False 
