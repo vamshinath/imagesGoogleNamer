@@ -59,7 +59,7 @@ def getName(fl):
 
     try:
         searchUrl = 'https://smallseotools.com/reverse-image-search/'
-        browser = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
+        browser = webdriver.Chrome(CHROMEDRIVER_PATH)
     
         filePath = fl
         browser.get(searchUrl)
@@ -68,22 +68,9 @@ def getName(fl):
         browser.find_element_by_id("imgFile").send_keys(filePath)
         browser.find_element_by_id("checkReverse").submit()
 
-        time.sleep(1.5)
-        link = getYandexLink(browser)
-        if link == False:
-            return 
-        browser.get(link)
-        time.sleep(2.5)
+        imgname=googleAndYanex(browser)
 
-        ul=getOtherContainerObject(browser)
-        if ul == False:
-            return
-
-        imgname=ul.find_element_by_class_name("other-sites__desc").text
-
-        print(imgname)
-
-        if imgname == None or len(imgname) < 3:
+        if imgname == False:
             print("Nothing")
             gotError = True
             return
@@ -96,20 +83,20 @@ def getName(fl):
         browser.close()
 
 
-def getYandexLink(browser):
-    link=''
+def getSLinks(browser):
+    links=[]
     counter = 0
-    while len(link) <3 and counter < 4:
+    while len(links) <3 and counter < 4:
         counter+=1
         try:
-            link=browser.find_elements_by_link_text("Check Images")[-1].get_attribute("href")
+            links=browser.find_elements_by_link_text("Check Images")
         except Exception as e:
             time.sleep(2.5)
 
-    if len(link) < 3:
+    if len(links) < 3:
         return False
 
-    return link
+    return links
 
 def getOtherContainerObject(browser):
     link=''
@@ -126,6 +113,48 @@ def getOtherContainerObject(browser):
 
     return link
 
+def googleAndYanex(browser):
+
+
+    slinks=getSLinks(browser)
+
+
+    imgname=getGoogleName(browser,slinks[0].get_attribute("href"))
+
+
+    if imgname == None or len(imgname) < 3 :
+        imgname = getYandexName(browser,slinks[-1].get_attribute("href"))
+
+    if imgname == None or len(imgname) < 3:
+        return False 
+    
+
+    return imgname
+
+def getGoogleName(browser,link):
+
+    browser.get(link)
+    time.sleep(2)
+    imgname=browser.find_element_by_xpath('//*[@title="Search"]').get_attribute("value")
+
+    return imgname
+
+
+def getYandexName(browser,link):
+
+    browser.get(link)
+    time.sleep(2.5)
+
+    ul=getOtherContainerObject(browser)
+    if ul == False:
+        return ""
+
+    time.sleep(0.3)
+    imgname=ul.find_element_by_class_name("other-sites__desc").text
+
+    return imgname
+
+
 
 def main():
 
@@ -137,6 +166,11 @@ def main():
     files = scanFiles()
 
     files_count = len(files)
+
+
+    # for img in files:
+    #     print(img)
+    #     getName(img)
 
     # mypool = Pool(8)
 
@@ -155,7 +189,7 @@ def main():
         threads.append(t)
         t.start()
         time.sleep(3)
-        while threading.active_count() > 8:
+        while threading.active_count() > 10:
             ctr=0
             for t in threads:
                 if ctr> 4:
