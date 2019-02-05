@@ -59,7 +59,7 @@ def getName(fl):
 
     try:
         searchUrl = 'https://smallseotools.com/reverse-image-search/'
-        browser = webdriver.Chrome(CHROMEDRIVER_PATH)
+        browser = webdriver.Chrome(CHROMEDRIVER_PATH,chrome_options=options)
     
         filePath = fl
         browser.get(searchUrl)
