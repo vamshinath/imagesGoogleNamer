@@ -25,7 +25,7 @@ def scanFiles():
             try:
                     f=os.path.abspath(os.path.join(root,filename))
                     fsz=os.stat(f).st_size
-                    if fsz < 10240:
+                    if fsz < 10240 or fsz > 4824000:
                         continue
                     ofiles[f]=fsz
             except Exception as e:
@@ -65,7 +65,12 @@ def getName(fl):
         browser.get(searchUrl)
         time.sleep(2.5)
 
-        browser.find_element_by_id("imgFile").send_keys(filePath)
+        
+
+        browser.find_element_by_name("myfile").send_keys(filePath)
+
+        time.sleep(10)
+
         browser.find_element_by_id("checkReverse").submit()
 
         imgname=googleAndYanex(browser)
@@ -89,7 +94,7 @@ def getSLinks(browser):
     while len(links) <3 and counter < 4:
         counter+=1
         try:
-            links=browser.find_elements_by_link_text("Check Images")
+            links=browser.find_elements_by_link_text("Show Matches")
         except Exception as e:
             time.sleep(2.5)
 
@@ -117,13 +122,17 @@ def googleAndYanex(browser):
 
 
     slinks=getSLinks(browser)
+    yand=slinks[-1].get_attribute("href")
 
-
-    imgname=getGoogleName(browser,slinks[0].get_attribute("href"))
+    try:
+        imgname=getGoogleName(browser,slinks[0].get_attribute("href"))
+    except Exception as e:
+        print("googleAndYandex:"+e)
+        imgname=''
 
 
     if imgname == None or len(imgname) < 3 :
-        imgname = "yn"+getYandexName(browser,slinks[-1].get_attribute("href"))
+        imgname = "yn"+getYandexName(browser,yand)
         print("Yandex")
 
     if imgname == None or len(imgname) < 3:
@@ -182,6 +191,9 @@ def main():
 
     threads=[]
 
+    # for img in files:
+    #     getName(img)
+    #     print()
 
     for img in files:
         if gotError:
@@ -190,7 +202,7 @@ def main():
         threads.append(t)
         t.start()
         time.sleep(3)
-        while threading.active_count() > 10:
+        while threading.active_count() > 8:
             ctr=0
             for t in threads:
                 if ctr> 4:
